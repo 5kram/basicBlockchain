@@ -25,17 +25,11 @@ class Block {
             this.nonce++;
             this.hash = this.calculateHash(this.data, this.timestamp, this.previousHash, this.nonce);
         }
-        this.sleep(1);
     }
 
     /* Calculates a hash based on the data, timestamp, previous hash and nonce */
     calculateHash(data, timestamp, previousHash, nonce) {
         return SHA256(JSON.stringify(data) + timestamp + previousHash + nonce).toString();
-    }
-
-    /* Sleep function to guarantee the uniqueness of the timestamp when a block is mined */
-    sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
 
@@ -43,12 +37,13 @@ class Chain {
 
     constructor() {
         this.chain = [this.createGenesisBlock()];
-        this.difficulty = 1;
+        this.difficulty = 4;
     }
     
     /* Creates the first block of the chain */
     createGenesisBlock() {
-        return new Block("Genesis Block", Date.now(), "");
+        /* Rounds and floors the timestamp value in seconds */
+        return new Block("Genesis Block", 1000, "");
     }
 
     /* Returns the latest block of the chain */
@@ -57,7 +52,7 @@ class Chain {
     }
 
     /* Adds a new block at the end of the chain
-     * Gets the previous hash and mines the new block with a given difficulty
+     * Gets the previous hash and mines the new block with the given difficulty
      */
     addBlock(newBlock) {
         newBlock.previousHash = this.getLatestBlock().hash;
@@ -69,6 +64,12 @@ class Chain {
      * Iterates the chain and checks that the hashes and the timestamp of each block have not been altered
      */
     isChainValid() {
+        /* Check if the Genesis block has been altered */
+        const Genesis = JSON.stringify(this.createGenesisBlock());
+        if (Genesis !== JSON.stringify(this.chain[0])) {
+            return false;
+        }
+
         for(let i = 1; i < this.chain.length; i++) {
             const currentBlock = this.chain[i];
             const previousBlock = this.chain[i - 1];
@@ -81,10 +82,14 @@ class Chain {
                 return false;
             }
             /* Check if the current timestamp is later in time than the previous block timestamp */
-            if(currentBlock.timestamp <= previousBlock.timestamp) {
+            if(currentBlock.timestamp < previousBlock.timestamp) {
                 return false;
             }            
         }
         return true;
     }
 }
+
+/* Allow other files to access exported code */
+module.exports.Chain = Chain;
+module.exports.Block = Block;
