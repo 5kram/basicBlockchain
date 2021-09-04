@@ -18,7 +18,6 @@ class Block {
     /* Mining function that calculates the hashes
      * The hash starts with n 0, depending on the difficulty
      * Nonce is increased by 1 in every iteration
-     * 1 ms delay to ensure that every block timestamp is unique  
      */
     mineBlock(difficulty) {
         while(this.hash.substring(0, difficulty) !== Array(difficulty + 1).join("0")) {
