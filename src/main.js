@@ -81,7 +81,7 @@ class Chain {
                 return false;
             }
             /* Check if the current timestamp is later in time than the previous block timestamp */
-            if(currentBlock.timestamp < previousBlock.timestamp) {
+            if(currentBlock.timestamp <= previousBlock.timestamp) {
                 return false;
             }            
         }
